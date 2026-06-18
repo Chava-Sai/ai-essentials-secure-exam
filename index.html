@@ -6,137 +6,200 @@
 <title>Essentials of AI — Secure Exam</title>
 <style>
   :root{
-    --bg:#0f1220; --card:#1a1f35; --card2:#232a47; --txt:#eef1f8; --muted:#9aa3c0;
-    --accent:#5b8cff; --accent2:#3a63d0; --good:#28c08a; --bad:#ff5c6c; --warn:#ffb43a;
-    --line:#2d3656;
+    --bg:#0b0f1f; --card:rgba(26,31,53,.82); --card2:#232a47; --txt:#eef1f8; --muted:#9aa3c0;
+    --accent:#6d8bff; --accent2:#a25bff; --good:#28c08a; --bad:#ff5c6c; --warn:#ffc24a;
+    --line:#2d3656; --glow:0 0 0 1px rgba(255,255,255,.04),0 18px 50px rgba(0,0,0,.45);
   }
   *{box-sizing:border-box}
   html,body{margin:0;height:100%}
   body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     background:var(--bg); color:var(--txt); -webkit-font-smoothing:antialiased;
-    user-select:none; -webkit-user-select:none;
+    user-select:none;-webkit-user-select:none; overflow-x:hidden;
   }
-  .wrap{max-width:880px;margin:0 auto;padding:28px 18px 60px}
-  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 24px;box-shadow:0 18px 50px rgba(0,0,0,.35)}
-  h1{font-size:24px;margin:0 0 6px}
+  /* animated background blobs */
+  .blob{position:fixed;border-radius:50%;filter:blur(80px);opacity:.35;z-index:-1;animation:float 18s ease-in-out infinite}
+  .b1{width:480px;height:480px;background:#3b4ddb;top:-120px;left:-100px}
+  .b2{width:420px;height:420px;background:#8a2be2;bottom:-140px;right:-80px;animation-delay:-6s}
+  .b3{width:360px;height:360px;background:#1f8fff;top:40%;left:55%;animation-delay:-11s}
+  @keyframes float{0%,100%{transform:translate(0,0) scale(1)}50%{transform:translate(30px,-40px) scale(1.12)}}
+
+  .wrap{max-width:880px;margin:0 auto;padding:26px 18px 70px}
+  .card{background:var(--card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+    border:1px solid var(--line);border-radius:20px;padding:26px 24px;box-shadow:var(--glow)}
+  h1{font-size:25px;margin:0 0 6px;letter-spacing:-.3px}
   h2{font-size:18px;margin:0 0 14px}
   .sub{color:var(--muted);font-size:14px;line-height:1.5}
   label{display:block;font-size:13px;color:var(--muted);margin:16px 0 6px}
-  input[type=text]{width:100%;padding:13px 14px;border-radius:10px;border:1px solid var(--line);
+  input[type=text]{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);
     background:var(--card2);color:var(--txt);font-size:15px;outline:none;user-select:text;-webkit-user-select:text}
-  input[type=text]:focus{border-color:var(--accent)}
-  .btn{display:inline-block;border:none;cursor:pointer;border-radius:10px;padding:13px 22px;
-    font-size:15px;font-weight:600;background:linear-gradient(180deg,var(--accent),var(--accent2));color:#fff}
-  .btn:hover{filter:brightness(1.07)} .btn:disabled{opacity:.5;cursor:not-allowed}
-  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
-  .pill{display:inline-block;font-size:12px;padding:4px 10px;border-radius:999px;background:var(--card2);color:var(--muted);margin-right:6px}
-  ul.rules{margin:14px 0 0;padding-left:20px;color:var(--muted);font-size:14px;line-height:1.7}
+  input[type=text]:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(109,139,255,.15)}
+  .btn{display:inline-flex;align-items:center;gap:8px;border:none;cursor:pointer;border-radius:12px;padding:13px 22px;
+    font-size:15px;font-weight:650;color:#fff;background:linear-gradient(135deg,var(--accent),var(--accent2));
+    box-shadow:0 8px 22px rgba(109,139,255,.35);transition:transform .12s,filter .12s}
+  .btn:hover{transform:translateY(-1px);filter:brightness(1.08)} .btn:active{transform:translateY(0)}
+  .btn:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt);box-shadow:none}
+  .btn.small{padding:9px 14px;font-size:13.5px}
+  .btn.hintbtn{background:linear-gradient(135deg,#ffb347,#ff7e5f);box-shadow:0 8px 22px rgba(255,126,95,.3)}
+  .btn.superbtn{background:linear-gradient(135deg,#11998e,#38ef7d);box-shadow:0 8px 22px rgba(56,239,125,.28);color:#062018}
+  .pill{display:inline-block;font-size:12px;padding:5px 11px;border-radius:999px;background:var(--card2);color:var(--muted);margin:0 6px 6px 0}
+  ul.rules{margin:14px 0 0;padding-left:20px;color:var(--muted);font-size:14px;line-height:1.75}
   ul.rules b{color:var(--txt)}
   .hidden{display:none !important}
 
   /* exam header */
-  .examTop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
-  .qcount{font-size:14px;color:var(--muted)}
-  .warns{font-size:13px;color:var(--warn)}
-  .timerWrap{margin:6px 0 18px}
-  .timerBar{height:8px;border-radius:6px;background:var(--card2);overflow:hidden}
+  .examTop{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap}
+  .ring{--p:0;width:54px;height:54px;border-radius:50%;display:grid;place-items:center;flex:0 0 auto;
+    background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--card2) 0)}
+  .ring i{width:42px;height:42px;border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:12px;font-style:normal;color:var(--muted);text-align:center;line-height:1.1}
+  .ring i b{color:var(--txt);font-size:13px}
+  .topMeta{flex:1}
+  .qcount{font-size:13px;color:var(--muted)}
+  .chips{margin-top:4px}
+  .warns{font-size:13px;color:var(--warn);white-space:nowrap}
+  .timerWrap{margin:14px 0 18px}
+  .timerBar{height:9px;border-radius:6px;background:var(--card2);overflow:hidden}
   .timerFill{height:100%;width:100%;background:linear-gradient(90deg,var(--good),var(--accent));transition:width 1s linear}
   .timerTxt{font-size:13px;color:var(--muted);margin-top:6px;display:flex;justify-content:space-between}
-  .qtext{font-size:18px;line-height:1.5;margin:6px 0 18px;white-space:pre-wrap}
-  .opt{display:flex;align-items:flex-start;gap:12px;padding:14px 14px;border:1px solid var(--line);
-    border-radius:12px;margin-bottom:10px;cursor:pointer;background:var(--card2);transition:.12s}
-  .opt:hover{border-color:var(--accent)}
-  .opt.sel{border-color:var(--accent);background:#26305a}
+  .qtext{font-size:19px;line-height:1.5;margin:6px 0 16px;white-space:pre-wrap}
+  .multiNote{font-size:12px;color:var(--warn);margin:-2px 0 12px}
+  .opt{display:flex;align-items:flex-start;gap:12px;padding:14px;border:1px solid var(--line);
+    border-radius:14px;margin-bottom:10px;cursor:pointer;background:var(--card2);transition:.14s}
+  .opt:hover{border-color:var(--accent);transform:translateX(2px)}
+  .opt.sel{border-color:var(--accent);background:#28315c;box-shadow:0 0 0 3px rgba(109,139,255,.18)}
   .opt input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent)}
   .opt span{font-size:15px;line-height:1.45}
-  .multiNote{font-size:12px;color:var(--warn);margin:-4px 0 12px}
-  .navRow{display:flex;justify-content:flex-end;margin-top:8px}
+  .qcard{animation:slidein .35s cubic-bezier(.2,.8,.2,1)}
+  @keyframes slidein{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 
-  /* overlay warning */
-  .overlay{position:fixed;inset:0;background:rgba(8,10,20,.94);display:flex;align-items:center;justify-content:center;z-index:50;padding:20px}
-  .overlay .card{max-width:520px;text-align:center;border-color:var(--bad)}
-  .overlay h2{color:var(--bad)}
-  .big{font-size:46px;margin:0 0 6px}
+  .hintPanel{margin:6px 0 14px;padding:14px 16px;border-radius:14px;border:1px dashed #ffb34766;
+    background:linear-gradient(135deg,rgba(255,179,71,.12),rgba(255,126,95,.08));animation:slidein .3s}
+  .hintPanel .he{font-size:26px;display:inline-block;animation:bounce 1.2s infinite}
+  .hintPanel p{margin:6px 0 0;font-size:14.5px;line-height:1.55;color:#ffe6c7}
+  @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+  .keyPanel{margin:6px 0 14px;padding:14px 16px;border-radius:14px;border:1px solid #38ef7d55;
+    background:rgba(56,239,125,.1);animation:pop .35s}
+  .keyPanel b{color:#7dffb0}
+  @keyframes pop{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 
-  .resultScore{font-size:46px;font-weight:800;margin:10px 0}
+  .actionRow{display:flex;gap:10px;align-items:center;margin-top:8px;flex-wrap:wrap}
+  .spacer{flex:1}
+
+  /* overlays */
+  .overlay{position:fixed;inset:0;background:rgba(8,10,20,.93);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px}
+  .overlay .card{max-width:520px;text-align:center;width:100%}
+  .overlay.warn .card{border-color:var(--bad)} .overlay.warn h2{color:var(--bad)}
+  .big{font-size:54px;margin:0 0 8px;line-height:1}
+  .puzzleQ{font-size:17px;margin:10px 0 14px;line-height:1.5}
+  .shake{animation:shake .4s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(8px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+  .proverb{font-style:italic;color:#cdd6ff;font-size:16px;margin:10px 18px;line-height:1.5}
+
+  .resultScore{font-size:52px;font-weight:800;margin:10px 0}
   .scoreGood{color:var(--good)} .scoreMid{color:var(--warn)} .scoreBad{color:var(--bad)}
-  .muted{color:var(--muted)}
-  table.log{width:100%;border-collapse:collapse;margin-top:14px;font-size:13px}
-  table.log td,table.log th{border-bottom:1px solid var(--line);padding:7px 8px;text-align:left;color:var(--muted)}
+  .statRow{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+  .stat{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:12px 16px;min-width:110px}
+  .stat b{display:block;font-size:22px} .stat span{font-size:12px;color:var(--muted)}
+
+  canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:70}
 </style>
 </head>
 <body>
-<div class="wrap">
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<canvas id="confetti" class="hidden"></canvas>
 
+<div class="wrap">
   <!-- ============ LOGIN ============ -->
   <section id="loginScreen" class="card">
-    <h1>Essentials of Artificial Intelligence</h1>
-    <div class="sub">Secure Proctored Exam · Days 1–11</div>
+    <h1>🧠 Essentials of Artificial Intelligence</h1>
+    <div class="sub">Secure Proctored Exam · Days 1–11 · with hints, puzzles & rewards</div>
     <div style="margin-top:14px">
       <span class="pill" id="pillCount">60 questions</span>
-      <span class="pill">Per-question timer</span>
-      <span class="pill">Fullscreen required</span>
-      <span class="pill">Randomized for each student</span>
+      <span class="pill">⏱ Per-question timer</span>
+      <span class="pill">💡 Real-life hints</span>
+      <span class="pill">🧩 Super-hint puzzles</span>
+      <span class="pill">🎉 Rewards every 10</span>
     </div>
-
     <label for="sName">Full Name</label>
     <input type="text" id="sName" placeholder="e.g. Sai Chava" autocomplete="off" />
     <label for="sRoll">Roll Number / Student ID</label>
     <input type="text" id="sRoll" placeholder="e.g. 21AI045" autocomplete="off" />
     <label for="sSection">Section / Lab (optional)</label>
     <input type="text" id="sSection" placeholder="e.g. Lab-2" autocomplete="off" />
-
     <ul class="rules">
-      <li>This exam opens in <b>fullscreen</b>. Leaving fullscreen or switching tabs/apps is <b>recorded</b>.</li>
-      <li>Each question has its <b>own countdown timer</b>. When it runs out, it auto-advances. <b>You cannot go back.</b></li>
-      <li>Every student receives a <b>different random set</b> of 60 questions and shuffled options.</li>
-      <li>Copy, paste and right-click are disabled. After <b id="maxW">3</b> violations the exam <b>auto-submits</b>.</li>
+      <li>Opens in <b>fullscreen</b>. Leaving fullscreen or switching tabs/apps is <b>recorded</b>.</li>
+      <li>Each question has its <b>own timer</b>; when it ends it auto-advances. <b>No going back.</b></li>
+      <li>Every student gets a <b>different random set</b> with shuffled options.</li>
+      <li>Stuck? Use a <b>💡 Hint</b> or solve a <b>🧩 Super-Hint puzzle</b> for a clue — usage is logged.</li>
+      <li>Copy/paste/right-click disabled. Exam <b>auto-submits after <span id="maxW">3</span> violations</b>.</li>
     </ul>
-    <div style="margin-top:22px">
-      <button class="btn" id="startBtn">I Understand — Start Exam in Fullscreen</button>
-    </div>
+    <div style="margin-top:22px"><button class="btn" id="startBtn">🚀 Start Exam in Fullscreen</button></div>
     <div id="loginErr" style="color:var(--bad);font-size:13px;margin-top:10px"></div>
   </section>
 
   <!-- ============ EXAM ============ -->
   <section id="examScreen" class="card hidden">
     <div class="examTop">
-      <div class="qcount" id="qCount">Question 1 of 60</div>
-      <div class="warns" id="warnCount">⚠ Violations: 0</div>
+      <div class="ring" id="ring"><i><b id="ringNum">1</b><br>/ 60</i></div>
+      <div class="topMeta">
+        <div class="qcount" id="qCount">Question 1 of 60</div>
+        <div class="chips"><span class="pill" id="topicChip">Topic</span><span class="pill" id="diffChip">EASY</span></div>
+      </div>
+      <div class="warns" id="warnCount">⚠ 0</div>
     </div>
     <div class="timerWrap">
       <div class="timerBar"><div class="timerFill" id="timerFill"></div></div>
-      <div class="timerTxt"><span id="diffTag"></span><span id="timerTxt">00:30</span></div>
+      <div class="timerTxt"><span>⏱ Time for this question</span><span id="timerTxt">00:30</span></div>
     </div>
-    <div class="qtext" id="qText"></div>
-    <div class="multiNote hidden" id="multiNote">Multiple answers may be correct — select all that apply.</div>
-    <div id="optWrap"></div>
-    <div class="navRow">
-      <button class="btn" id="nextBtn">Next →</button>
-    </div>
+    <div id="qBody"></div>
   </section>
 
   <!-- ============ RESULT ============ -->
   <section id="resultScreen" class="card hidden" style="text-align:center">
-    <h1>Exam Submitted</h1>
+    <div class="big">🎓</div>
+    <h1>Exam Submitted!</h1>
     <div class="sub" id="resName"></div>
     <div class="resultScore" id="resScore">—</div>
-    <div class="muted" id="resDetail"></div>
-    <div class="muted" id="resSync" style="margin-top:14px"></div>
-    <div id="resLog"></div>
+    <div class="statRow" id="resStats"></div>
+    <div class="sub" id="resSync" style="margin-top:16px"></div>
   </section>
-
 </div>
 
 <!-- ============ WARNING OVERLAY ============ -->
-<div id="overlay" class="overlay hidden">
+<div id="overlay" class="overlay warn hidden">
   <div class="card">
     <div class="big">🚫</div>
-    <h2 id="ovTitle">Exam rule violation detected</h2>
+    <h2 id="ovTitle">Exam rule violation</h2>
     <p class="sub" id="ovMsg"></p>
-    <p class="warns" id="ovCount"></p>
-    <button class="btn" id="ovBtn">Return to Exam (Fullscreen)</button>
+    <p class="warns" id="ovCount" style="margin:12px 0"></p>
+    <button class="btn" id="ovBtn">↩ Return to Exam (Fullscreen)</button>
+  </div>
+</div>
+
+<!-- ============ SUPER-HINT PUZZLE OVERLAY ============ -->
+<div id="puzzleOverlay" class="overlay hidden">
+  <div class="card" id="puzzleCard">
+    <div class="big">🧩</div>
+    <h2>Super Hint — solve to unlock a clue</h2>
+    <p class="puzzleQ" id="puzzleQ"></p>
+    <input type="text" id="puzzleInput" placeholder="Your answer…" autocomplete="off" />
+    <div style="margin-top:14px;display:flex;gap:10px;justify-content:center">
+      <button class="btn superbtn" id="puzzleSubmit">Unlock 🔓</button>
+      <button class="btn ghost" id="puzzleClose">Cancel</button>
+    </div>
+    <div id="puzzleMsg" class="sub" style="margin-top:10px"></div>
+  </div>
+</div>
+
+<!-- ============ MILESTONE OVERLAY ============ -->
+<div id="milestoneOverlay" class="overlay hidden">
+  <div class="card">
+    <div class="big" id="msEmoji">🎉</div>
+    <h2 id="msTitle">Great progress!</h2>
+    <p class="proverb" id="msProverb"></p>
+    <p class="sub" id="msProgress"></p>
+    <button class="btn" id="msContinue" style="margin-top:8px">Keep Going 💪</button>
   </div>
 </div>
 
@@ -145,233 +208,312 @@
 /* ========================= CONFIG ========================= */
 const CONFIG = {
   examTitle: "Essentials of AI - Days 1-11",
-  questionsPerStudent: 60,          // each student gets this many out of the full bank
-  maxViolations: 3,                 // auto-submit after this many tab-switch / fullscreen-exit events
-  showScoreToStudent: true,         // set false to hide score after submit
-  // Paste your Google Apps Script Web App URL here after deploying Code.gs:
+  questionsPerStudent: 60,
+  maxViolations: 3,
+  showScoreToStudent: true,
   appsScriptUrl: "https://script.google.com/macros/s/AKfycbxENa9KEg01PBkKJ_cn19v09qQxlVYGp4Ts5g6KBpvXDP2cl6wC4Bj5n3LGdtQuhwoZ/exec"
 };
 /* ========================================================= */
 
-document.getElementById('pillCount').textContent = CONFIG.questionsPerStudent + " questions";
-document.getElementById('maxW').textContent = CONFIG.maxViolations;
+const DAY_EMOJI={1:"🐍",2:"🏗️",3:"📊",4:"🔢",5:"📈",6:"🎯",7:"🌳",8:"🧬",9:"🧠",10:"👁️",11:"💬"};
 
-const el = id => document.getElementById(id);
-let exam = [];          // the student's selected & shuffled questions
-let idx = 0;            // current question index
-let answers = [];       // student's chosen option indices per exam question
-let violations = [];    // {type, q, time}
-let qTimer = null, qRemaining = 0, examStarted = false, finished = false;
-let startTime = null;
-const student = {};
+const PUZZLES=[
+  {q:"I am an odd number. Remove one letter and I become even. What number am I?", a:["seven"]},
+  {q:"Unscramble these letters to get a key AI word: A T A D", a:["data"]},
+  {q:"What is 15 + 27?", a:["42"]},
+  {q:"What comes next: 2, 4, 8, 16, ?", a:["32"]},
+  {q:"What has many keys but can't open a single lock?", a:["piano","keyboard","a piano","a keyboard"]},
+  {q:"I'm tall when I'm young and short when I'm old. What am I?", a:["candle","a candle"]},
+  {q:"Half of 100, plus 10 = ?", a:["60"]},
+  {q:"How many sides does a triangle have?", a:["3","three"]},
+  {q:"Unscramble to get an ML word: E D O M L", a:["model"]},
+  {q:"5 × 6 − 4 = ?", a:["26"]},
+  {q:"What 3-letter word do AI engineers use for Machine Learning?", a:["ml"]},
+  {q:"I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?", a:["echo","an echo"]}
+];
 
-/* ---------- utilities ---------- */
-function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+const MILESTONES=[
+  {e:"🚀",t:"Lift-off!",p:"“A journey of a thousand miles begins with a single step.” You're moving!"},
+  {e:"🔥",t:"On fire!",p:"“Little by little, a little becomes a lot.” Keep stacking those points!"},
+  {e:"🌟",t:"Shining!",p:"“Success is the sum of small efforts repeated day in and day out.”"},
+  {e:"🧠",t:"Brain gains!",p:"“The expert in anything was once a beginner.” You've got this!"},
+  {e:"💪",t:"Unstoppable!",p:"“Fall seven times, stand up eight.” Momentum is yours!"},
+  {e:"🎯",t:"Locked in!",p:"“Well begun is half done.” Stay sharp, stay calm, stay winning!"},
+  {e:"⚡",t:"Charged up!",p:"“Energy and persistence conquer all things.” — Benjamin Franklin"},
+  {e:"🌈",t:"Almost there!",p:"“Don't watch the clock; do what it does — keep going.”"}
+];
+
+const el=id=>document.getElementById(id);
+let exam=[],idx=0,answers=[],violations=[];
+let qTimer=null,qRemaining=0,examStarted=false,finished=false,startTime=null;
+let hintsUsed=0,superHintsUsed=0;
+const student={};
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function pad(n){return String(n).padStart(2,'0');}
 function fmt(s){return pad(Math.floor(s/60))+":"+pad(s%60);}
 
-/* ---------- build a unique exam for this student ---------- */
+el('pillCount').textContent=CONFIG.questionsPerStudent+" questions";
+el('maxW').textContent=CONFIG.maxViolations;
+el('ringNum').parentElement.innerHTML=`<b id="ringNum">1</b><br>/ ${CONFIG.questionsPerStudent}`;
+
+/* ---------- build a unique exam ---------- */
 function buildExam(){
-  const picked = shuffle(QUESTIONS).slice(0, Math.min(CONFIG.questionsPerStudent, QUESTIONS.length));
-  exam = picked.map(q=>{
-    // shuffle options while tracking which are correct
-    const correctSet = new Set(Array.isArray(q.answer)? q.answer : [q.answer]);
-    let opts = q.options.map((text,i)=>({text, correct: correctSet.has(i)}));
-    // keep True/False in natural order, shuffle others
-    if(q.type !== 'tf') opts = shuffle(opts);
-    return { id:q.id, day:q.day, topic:q.topic, type:q.type, diff:q.diff, time:q.time, q:q.q, opts };
+  const picked=shuffle(QUESTIONS).slice(0,Math.min(CONFIG.questionsPerStudent,QUESTIONS.length));
+  exam=picked.map(q=>{
+    const correctSet=new Set(Array.isArray(q.answer)?q.answer:[q.answer]);
+    let opts=q.options.map((text,i)=>({text,correct:correctSet.has(i)}));
+    if(q.type!=='tf') opts=shuffle(opts);
+    return {id:q.id,day:q.day,topic:q.topic,type:q.type,diff:q.diff,time:q.time,q:q.q,hint:q.hint,key:q.key,
+      opts, puzzle:PUZZLES[Math.floor(Math.random()*PUZZLES.length)],
+      hintShown:false,keyShown:false};
   });
-  answers = exam.map(()=>[]);
+  answers=exam.map(()=>[]);
 }
 
-/* ---------- fullscreen helpers ---------- */
-function goFullscreen(){
-  const d=document.documentElement;
-  const fn=d.requestFullscreen||d.webkitRequestFullscreen||d.msRequestFullscreen;
-  if(fn) return fn.call(d).catch(()=>{});
-  return Promise.resolve();
-}
-function isFullscreen(){ return !!(document.fullscreenElement||document.webkitFullscreenElement); }
+/* ---------- fullscreen ---------- */
+function goFullscreen(){const d=document.documentElement;const fn=d.requestFullscreen||d.webkitRequestFullscreen||d.msRequestFullscreen;if(fn)return fn.call(d).catch(()=>{});return Promise.resolve();}
+function isFullscreen(){return !!(document.fullscreenElement||document.webkitFullscreenElement);}
 
 /* ---------- start ---------- */
-el('startBtn').onclick = async () => {
-  const name=el('sName').value.trim(), roll=el('sRoll').value.trim();
-  if(!name||!roll){ el('loginErr').textContent="Please enter your name and roll number."; return; }
-  student.name=name; student.roll=roll; student.section=el('sSection').value.trim()||"-";
+el('startBtn').onclick=async()=>{
+  const name=el('sName').value.trim(),roll=el('sRoll').value.trim();
+  if(!name||!roll){el('loginErr').textContent="Please enter your name and roll number.";return;}
+  student.name=name;student.roll=roll;student.section=el('sSection').value.trim()||"-";
   buildExam();
   await goFullscreen();
   el('loginScreen').classList.add('hidden');
   el('examScreen').classList.remove('hidden');
-  examStarted=true; startTime=Date.now();
+  examStarted=true;startTime=Date.now();
   attachProctoring();
   renderQuestion();
 };
 
-/* ---------- render a question ---------- */
+/* ---------- render question ---------- */
 function renderQuestion(){
   clearInterval(qTimer);
   const q=exam[idx];
+  el('ringNum').textContent=idx+1;
+  el('ring').style.setProperty('--p',Math.round((idx/exam.length)*100));
   el('qCount').textContent=`Question ${idx+1} of ${exam.length}`;
-  el('diffTag').textContent=`Day ${q.day} · ${q.topic} · ${q.diff.toUpperCase()}`;
-  el('qText').textContent=q.q;
-  el('multiNote').classList.toggle('hidden', q.type!=='multi');
-  el('nextBtn').textContent = (idx===exam.length-1) ? "Submit Exam" : "Next →";
+  el('topicChip').textContent=`${DAY_EMOJI[q.day]} Day ${q.day} · ${q.topic}`;
+  el('diffChip').textContent=q.diff.toUpperCase();
 
-  const wrap=el('optWrap'); wrap.innerHTML='';
-  const inputType = q.type==='multi' ? 'checkbox' : 'radio';
+  const isMulti=q.type==='multi';
+  const body=el('qBody');
+  body.innerHTML=`<div class="qcard">
+    <div class="qtext">${escapeHtml(q.q)}</div>
+    ${isMulti?'<div class="multiNote">✔ Multiple answers may be correct — select all that apply.</div>':''}
+    <div id="optWrap"></div>
+    <div id="hintZone"></div>
+    <div class="actionRow">
+      <button class="btn hintbtn small" id="hintBtn">💡 Hint</button>
+      <button class="btn superbtn small" id="superBtn">🧩 Super Hint</button>
+      <span class="spacer"></span>
+      <button class="btn" id="nextBtn">${idx===exam.length-1?'✅ Submit Exam':'Next →'}</button>
+    </div></div>`;
+
+  const wrap=el('optWrap');
+  const inputType=isMulti?'checkbox':'radio';
   q.opts.forEach((o,i)=>{
-    const row=document.createElement('label'); row.className='opt';
-    const inp=document.createElement('input');
-    inp.type=inputType; inp.name='opt'; inp.value=i;
-    if(answers[idx].includes(i)) { inp.checked=true; row.classList.add('sel'); }
+    const row=document.createElement('label');row.className='opt';
+    const inp=document.createElement('input');inp.type=inputType;inp.name='opt';inp.value=i;
+    if(answers[idx].includes(i)){inp.checked=true;row.classList.add('sel');}
     inp.onchange=()=>{
-      if(q.type==='multi'){
-        answers[idx] = [...wrap.querySelectorAll('input:checked')].map(x=>+x.value);
-      } else {
-        answers[idx] = [i];
-      }
+      if(isMulti) answers[idx]=[...wrap.querySelectorAll('input:checked')].map(x=>+x.value);
+      else answers[idx]=[i];
       [...wrap.children].forEach(c=>c.classList.remove('sel'));
       wrap.querySelectorAll('input:checked').forEach(x=>x.parentElement.classList.add('sel'));
     };
-    const sp=document.createElement('span'); sp.textContent=o.text;
-    row.appendChild(inp); row.appendChild(sp); wrap.appendChild(row);
+    const sp=document.createElement('span');sp.textContent=o.text;
+    row.appendChild(inp);row.appendChild(sp);wrap.appendChild(row);
   });
 
-  // per-question timer
-  qRemaining=q.time;
-  updateTimer();
-  qTimer=setInterval(()=>{
-    qRemaining--;
-    if(qRemaining<=0){ clearInterval(qTimer); nextQuestion(true); }
-    else updateTimer();
-  },1000);
+  // restore hint/key panels if already shown
+  if(q.hintShown) renderHint();
+  if(q.keyShown) renderKey();
+
+  el('hintBtn').onclick=()=>{ if(!q.hintShown){hintsUsed++;q.hintShown=true;} renderHint(); el('hintBtn').disabled=true; };
+  el('superBtn').onclick=openPuzzle;
+  if(q.hintShown) el('hintBtn').disabled=true;
+  if(q.keyShown) el('superBtn').disabled=true;
+  el('nextBtn').onclick=()=>nextQuestion();
+
+  qRemaining=q.time;updateTimer();
+  qTimer=setInterval(()=>{qRemaining--;if(qRemaining<=0){clearInterval(qTimer);nextQuestion();}else updateTimer();},1000);
 }
+function renderHint(){
+  const q=exam[idx];const hz=el('hintZone');
+  if(hz.querySelector('.hintPanel'))return;
+  const d=document.createElement('div');d.className='hintPanel';
+  const m=q.hint.match(/(\p{Emoji})\s*$/u);
+  d.innerHTML=`<span class="he">💡</span> <b style="color:#ffd9a8">Real-life hint:</b><p>${escapeHtml(q.hint)}</p>`;
+  hz.appendChild(d);
+}
+function renderKey(){
+  const q=exam[idx];const hz=el('hintZone');
+  if(hz.querySelector('.keyPanel'))return;
+  const d=document.createElement('div');d.className='keyPanel';
+  d.innerHTML=`🔓 <b>Super-Hint keyword:</b> ${escapeHtml(q.key)}`;
+  hz.appendChild(d);
+}
+function escapeHtml(s){return s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
 function updateTimer(){
-  const q=exam[idx];
-  el('timerTxt').textContent=fmt(qRemaining);
-  const pct=Math.max(0,(qRemaining/q.time)*100);
-  const fill=el('timerFill'); fill.style.width=pct+'%';
-  fill.style.background = pct<25 ? 'var(--bad)' : pct<50 ? 'linear-gradient(90deg,var(--warn),var(--accent))' : 'linear-gradient(90deg,var(--good),var(--accent))';
+  const q=exam[idx];el('timerTxt').textContent=fmt(qRemaining);
+  const pct=Math.max(0,(qRemaining/q.time)*100);const fill=el('timerFill');fill.style.width=pct+'%';
+  fill.style.background=pct<25?'var(--bad)':pct<50?'linear-gradient(90deg,var(--warn),var(--accent))':'linear-gradient(90deg,var(--good),var(--accent))';
 }
 
 /* ---------- navigation (forward only) ---------- */
-el('nextBtn').onclick=()=>nextQuestion(false);
 function nextQuestion(){
   clearInterval(qTimer);
-  if(idx<exam.length-1){ idx++; renderQuestion(); }
-  else finishExam();
+  if(idx<exam.length-1){
+    idx++;
+    if(idx%10===0) showMilestone();   // reward after every 10 answered
+    else renderQuestion();
+  } else finishExam();
 }
 
-/* ---------- grading ---------- */
-function isCorrect(q, chosen){
-  const correctIdx = q.opts.map((o,i)=>o.correct?i:-1).filter(i=>i>=0);
-  if(chosen.length===0) return false;
-  if(q.type==='multi'){
-    return chosen.length===correctIdx.length && chosen.every(c=>correctIdx.includes(c));
-  }
-  return chosen.length===1 && correctIdx.includes(chosen[0]);
+/* ---------- super-hint puzzle ---------- */
+let puzzleActive=false;
+function openPuzzle(){
+  const q=exam[idx];
+  if(q.keyShown){return;}
+  puzzleActive=true;
+  el('puzzleQ').textContent=q.puzzle.q;
+  el('puzzleInput').value='';el('puzzleMsg').textContent='';
+  el('puzzleOverlay').classList.remove('hidden');
+  setTimeout(()=>el('puzzleInput').focus(),50);
 }
+el('puzzleSubmit').onclick=()=>{
+  const q=exam[idx];const guess=el('puzzleInput').value.trim().toLowerCase();
+  if(!guess)return;
+  if(q.puzzle.a.includes(guess)){
+    superHintsUsed++;q.keyShown=true;
+    el('puzzleOverlay').classList.add('hidden');puzzleActive=false;
+    renderKey();el('superBtn').disabled=true;
+    burstConfetti(900);
+  } else {
+    el('puzzleMsg').textContent="Not quite — try again! 🤔";
+    el('puzzleCard').classList.remove('shake');void el('puzzleCard').offsetWidth;el('puzzleCard').classList.add('shake');
+  }
+};
+el('puzzleInput').addEventListener('keydown',e=>{if(e.key==='Enter')el('puzzleSubmit').click();});
+el('puzzleClose').onclick=()=>{el('puzzleOverlay').classList.add('hidden');puzzleActive=false;};
+
+/* ---------- milestone reward ---------- */
+function showMilestone(){
+  const m=MILESTONES[Math.floor((idx/10-1))%MILESTONES.length];
+  el('msEmoji').textContent=m.e;el('msTitle').textContent=`${idx} questions done — ${m.t}`;
+  el('msProverb').textContent=m.p;
+  el('msProgress').textContent=`${idx} of ${exam.length} complete · ${exam.length-idx} to go · ${Math.round(idx/exam.length*100)}%`;
+  el('milestoneOverlay').classList.remove('hidden');
+  burstConfetti(1600);
+}
+el('msContinue').onclick=()=>{el('milestoneOverlay').classList.add('hidden');renderQuestion();};
 
 /* ---------- proctoring ---------- */
 function logViolation(type){
-  if(!examStarted||finished) return;
-  violations.push({type, q:idx+1, time:new Date().toISOString()});
-  el('warnCount').textContent=`⚠ Violations: ${violations.length}`;
+  if(!examStarted||finished)return;
+  violations.push({type,q:idx+1,time:new Date().toISOString()});
+  el('warnCount').textContent=`⚠ ${violations.length}`;
   showOverlay(type);
-  if(violations.length>=CONFIG.maxViolations){ finishExam(true); }
+  if(violations.length>=CONFIG.maxViolations) finishExam(true);
 }
 function showOverlay(type){
-  if(finished) return;
-  el('ovTitle').textContent = type==='Exited fullscreen' ? "You left fullscreen mode" : "You switched away from the exam";
-  el('ovMsg').textContent = type==='Exited fullscreen'
-    ? "Please return to fullscreen to continue. This event has been recorded."
-    : "Switching tabs, windows or apps during the exam is not allowed. This event has been recorded.";
-  el('ovCount').textContent = `Violation ${violations.length} of ${CONFIG.maxViolations}. Exam auto-submits at ${CONFIG.maxViolations}.`;
+  if(finished)return;
+  el('ovTitle').textContent=type==='Exited fullscreen'?"You left fullscreen mode":"You switched away from the exam";
+  el('ovMsg').textContent=type==='Exited fullscreen'
+    ?"Return to fullscreen to continue. This was recorded."
+    :"Switching tabs, windows or apps during the exam is not allowed. This was recorded.";
+  el('ovCount').textContent=`Violation ${violations.length} of ${CONFIG.maxViolations}. Auto-submit at ${CONFIG.maxViolations}.`;
   el('overlay').classList.remove('hidden');
 }
-el('ovBtn').onclick=async()=>{ await goFullscreen(); el('overlay').classList.add('hidden'); };
+el('ovBtn').onclick=async()=>{await goFullscreen();el('overlay').classList.add('hidden');};
 
 function attachProctoring(){
-  document.addEventListener('visibilitychange',()=>{ if(document.hidden) logViolation('Tab/app switch'); });
-  window.addEventListener('blur',()=>{ if(examStarted&&!finished&&!isFullscreen()) logViolation('Window switch'); });
-  document.addEventListener('fullscreenchange',()=>{ if(examStarted&&!finished&&!isFullscreen()) logViolation('Exited fullscreen'); });
-  document.addEventListener('webkitfullscreenchange',()=>{ if(examStarted&&!finished&&!isFullscreen()) logViolation('Exited fullscreen'); });
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)logViolation('Tab/app switch');});
+  window.addEventListener('blur',()=>{if(examStarted&&!finished&&!isFullscreen()&&!puzzleActive)logViolation('Window switch');});
+  ['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{if(examStarted&&!finished&&!isFullscreen())logViolation('Exited fullscreen');}));
   document.addEventListener('contextmenu',e=>e.preventDefault());
-  ['copy','cut','paste'].forEach(ev=>document.addEventListener(ev,e=>{ if(examStarted) e.preventDefault(); }));
+  ['copy','cut','paste'].forEach(ev=>document.addEventListener(ev,e=>{if(examStarted&&e.target.id!=='puzzleInput')e.preventDefault();}));
   document.addEventListener('keydown',e=>{
-    if(!examStarted||finished) return;
+    if(!examStarted||finished)return;
     const k=e.key.toLowerCase();
-    const block = (e.ctrlKey||e.metaKey) && ['c','v','x','u','p','s'].includes(k);
-    const dev = k==='f12' || ((e.ctrlKey||e.metaKey)&&e.shiftKey&&['i','j','c'].includes(k));
-    if(block||dev){ e.preventDefault(); logViolation('Blocked shortcut'); }
+    if(e.target.id==='puzzleInput')return;
+    const block=(e.ctrlKey||e.metaKey)&&['c','v','x','u','p','s'].includes(k);
+    const dev=k==='f12'||((e.ctrlKey||e.metaKey)&&e.shiftKey&&['i','j','c'].includes(k));
+    if(block||dev){e.preventDefault();logViolation('Blocked shortcut');}
   });
-  window.addEventListener('beforeunload',e=>{ if(examStarted&&!finished){ e.preventDefault(); e.returnValue=''; } });
+  window.addEventListener('beforeunload',e=>{if(examStarted&&!finished){e.preventDefault();e.returnValue='';}});
+}
+
+/* ---------- grading ---------- */
+function isCorrect(q,chosen){
+  const correctIdx=q.opts.map((o,i)=>o.correct?i:-1).filter(i=>i>=0);
+  if(chosen.length===0)return false;
+  if(q.type==='multi')return chosen.length===correctIdx.length&&chosen.every(c=>correctIdx.includes(c));
+  return chosen.length===1&&correctIdx.includes(chosen[0]);
 }
 
 /* ---------- finish & submit ---------- */
 function finishExam(auto){
-  if(finished) return;
-  finished=true; clearInterval(qTimer);
-  el('overlay').classList.add('hidden');
-  // grade
+  if(finished)return;finished=true;clearInterval(qTimer);
+  el('overlay').classList.add('hidden');el('puzzleOverlay').classList.add('hidden');el('milestoneOverlay').classList.add('hidden');
   let score=0;
-  const detail = exam.map((q,i)=>{
-    const ok=isCorrect(q,answers[i]); if(ok) score++;
-    const chosenText=answers[i].map(c=>q.opts[c].text);
-    return { id:q.id, day:q.day, topic:q.topic, correct:ok, chosen:chosenText };
-  });
-  const total=exam.length;
-  const pct=Math.round((score/total)*100);
-  const timeTakenSec=Math.round((Date.now()-startTime)/1000);
+  const detail=exam.map((q,i)=>{const ok=isCorrect(q,answers[i]);if(ok)score++;
+    return {id:q.id,day:q.day,topic:q.topic,correct:ok,hintUsed:q.hintShown,superHintUsed:q.keyShown,chosen:answers[i].map(c=>q.opts[c].text)};});
+  const total=exam.length,pct=Math.round((score/total)*100),timeTakenSec=Math.round((Date.now()-startTime)/1000);
+  const payload={name:student.name,roll:student.roll,section:student.section,score,total,percent:pct,
+    timeTakenSec,autoSubmitted:!!auto,violationCount:violations.length,violations,
+    hintsUsed,superHintsUsed,questionIds:exam.map(q=>q.id),detail,submittedAt:new Date().toISOString(),examTitle:CONFIG.examTitle};
 
-  const payload={
-    name:student.name, roll:student.roll, section:student.section,
-    score, total, percent:pct,
-    timeTakenSec, autoSubmitted:!!auto,
-    violationCount:violations.length, violations,
-    questionIds:exam.map(q=>q.id),
-    detail, submittedAt:new Date().toISOString(),
-    examTitle:CONFIG.examTitle
-  };
-
-  // show result
-  el('examScreen').classList.add('hidden');
-  el('resultScreen').classList.remove('hidden');
+  el('examScreen').classList.add('hidden');el('resultScreen').classList.remove('hidden');
   el('resName').textContent=`${student.name} · ${student.roll}`;
   if(CONFIG.showScoreToStudent){
-    const cls = pct>=70?'scoreGood':pct>=40?'scoreMid':'scoreBad';
+    const cls=pct>=70?'scoreGood':pct>=40?'scoreMid':'scoreBad';
     el('resScore').innerHTML=`<span class="${cls}">${score} / ${total}</span>`;
-    el('resDetail').textContent=`${pct}%  ·  Time: ${fmt(timeTakenSec)}  ·  Violations: ${violations.length}`+(auto?"  ·  AUTO-SUBMITTED":"");
-  } else {
-    el('resScore').textContent="✓";
-    el('resDetail').textContent="Your response has been recorded.";
-  }
-  // exit fullscreen
+    el('resStats').innerHTML=
+      `<div class="stat"><b class="${cls}">${pct}%</b><span>Score</span></div>`+
+      `<div class="stat"><b>${fmt(timeTakenSec)}</b><span>Time</span></div>`+
+      `<div class="stat"><b>${hintsUsed}</b><span>💡 Hints</span></div>`+
+      `<div class="stat"><b>${superHintsUsed}</b><span>🧩 Super</span></div>`+
+      `<div class="stat"><b>${violations.length}</b><span>⚠ Violations</span></div>`;
+    if(pct>=70) burstConfetti(2200);
+  } else { el('resScore').textContent="✓"; el('resStats').innerHTML='<div class="sub">Your response has been recorded.</div>'; }
   if(document.exitFullscreen) document.exitFullscreen().catch(()=>{});
-
   submit(payload);
 }
-
 function submit(payload){
   const sync=el('resSync');
-  if(!CONFIG.appsScriptUrl || CONFIG.appsScriptUrl.startsWith('PASTE')){
-    sync.textContent="⚠ No server configured — downloading your result file. Hand it to the instructor.";
-    downloadResult(payload); return;
-  }
+  if(!CONFIG.appsScriptUrl||CONFIG.appsScriptUrl.startsWith('PASTE')){
+    sync.textContent="⚠ No server configured — downloading your result file. Hand it to the instructor.";downloadResult(payload);return;}
   sync.textContent="Saving your response…";
-  fetch(CONFIG.appsScriptUrl,{
-    method:'POST',
-    headers:{'Content-Type':'text/plain;charset=utf-8'}, // text/plain avoids CORS preflight
-    body:JSON.stringify(payload)
-  }).then(()=>{ sync.textContent="✓ Response saved successfully."; })
-    .catch(()=>{ sync.textContent="⚠ Could not reach server — downloading backup file instead."; downloadResult(payload); });
+  fetch(CONFIG.appsScriptUrl,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(payload)})
+    .then(()=>{sync.textContent="✓ Response saved successfully.";})
+    .catch(()=>{sync.textContent="⚠ Could not reach server — downloading backup file.";downloadResult(payload);});
 }
 function downloadResult(payload){
   const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
-  const a=document.createElement('a');
-  a.href=URL.createObjectURL(blob);
-  a.download=`exam_${payload.roll}_${Date.now()}.json`;
-  document.body.appendChild(a); a.click(); a.remove();
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`exam_${payload.roll}_${Date.now()}.json`;
+  document.body.appendChild(a);a.click();a.remove();
+}
+
+/* ---------- confetti ---------- */
+function burstConfetti(ms){
+  const cv=el('confetti');cv.classList.remove('hidden');
+  const ctx=cv.getContext('2d');cv.width=innerWidth;cv.height=innerHeight;
+  const colors=['#6d8bff','#a25bff','#38ef7d','#ffc24a','#ff5c6c','#1f8fff'];
+  const N=140,parts=[];
+  for(let i=0;i<N;i++)parts.push({x:Math.random()*cv.width,y:-20-Math.random()*cv.height*0.3,
+    r:4+Math.random()*6,c:colors[i%colors.length],vy:2+Math.random()*4,vx:-2+Math.random()*4,rot:Math.random()*6,vr:-.2+Math.random()*.4});
+  const end=Date.now()+ms;
+  (function frame(){
+    ctx.clearRect(0,0,cv.width,cv.height);
+    parts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=p.c;ctx.fillRect(-p.r/2,-p.r/2,p.r,p.r*0.6);ctx.restore();});
+    if(Date.now()<end)requestAnimationFrame(frame);else cv.classList.add('hidden');
+  })();
 }
 </script>
 </body>

@@ -39,14 +39,16 @@ function doPost(e) {
       sheet.appendRow([
         'Submitted At', 'Name', 'Roll', 'Section',
         'Score', 'Total', 'Percent', 'Time (sec)',
-        'Auto Submitted', 'Violations', 'Question IDs', 'Exam'
+        'Auto Submitted', 'Violations', 'Hints Used', 'Super Hints',
+        'Question IDs', 'Exam'
       ]);
-      sheet.getRange(1, 1, 1, 12).setFontWeight('bold');
+      sheet.getRange(1, 1, 1, 14).setFontWeight('bold');
     }
     sheet.appendRow([
       data.submittedAt, data.name, data.roll, data.section,
       data.score, data.total, data.percent, data.timeTakenSec,
       data.autoSubmitted ? 'YES' : 'no', data.violationCount,
+      data.hintsUsed || 0, data.superHintsUsed || 0,
       (data.questionIds || []).join(','), data.examTitle
     ]);
 
