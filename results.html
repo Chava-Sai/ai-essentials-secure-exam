@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Exam Results — Teacher Dashboard</title>
+<style>
+  :root{--bg:#0b0f1f;--card:#161b30;--card2:#1f2740;--txt:#eef1f8;--muted:#9aa3c0;--accent:#6d8bff;--good:#28c08a;--bad:#ff5c6c;--warn:#ffc24a;--line:#2d3656}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--txt);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 70px}
+  h1{font-size:26px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px;box-shadow:0 16px 40px rgba(0,0,0,.4)}
+  input{padding:12px 14px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--txt);font-size:15px;outline:none}
+  input:focus{border-color:var(--accent)}
+  .btn{border:none;cursor:pointer;border-radius:10px;padding:12px 20px;font-size:15px;font-weight:650;color:#fff;background:linear-gradient(135deg,var(--accent),#a25bff)}
+  .btn:hover{filter:brightness(1.08)}
+  .btn.ghost{background:transparent;border:1px solid var(--line);color:var(--txt)}
+  .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+  .stat{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:16px;text-align:center}
+  .stat b{display:block;font-size:30px;font-weight:800} .stat span{font-size:12px;color:var(--muted)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;margin-top:10px}
+  th,td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
+  th{color:var(--muted);font-size:12px;letter-spacing:.4px;cursor:pointer;user-select:none;white-space:nowrap}
+  th:hover{color:var(--txt)}
+  tr:hover td{background:rgba(109,139,255,.06)}
+  .tagV{color:var(--warn);font-weight:700}
+  .tagA{color:var(--bad);font-weight:700}
+  .scoreGood{color:var(--good);font-weight:800}.scoreMid{color:var(--warn);font-weight:800}.scoreBad{color:var(--bad);font-weight:800}
+  .err{color:var(--bad);font-size:14px;margin-top:10px}
+  .muted{color:var(--muted)}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>📊 Exam Results — Teacher Dashboard</h1>
+  <div class="sub">Live scores for “Essentials of AI — Secure Exam”.</div>
+
+  <div class="card" style="margin-top:18px" id="authCard">
+    <div class="row">
+      <input id="key" type="password" placeholder="Teacher passcode" style="flex:1;min-width:200px" />
+      <button class="btn" id="loadBtn">Load Results</button>
+      <button class="btn ghost" id="sheetBtn">Open Google Sheet</button>
+    </div>
+    <div class="err" id="err"></div>
+    <div class="sub" style="margin-top:8px">Passcode is set in <b>Code.gs</b> (<code>TEACHER_KEY</code>). Default: <code>aiexam2026</code> — change it.</div>
+  </div>
+
+  <div id="dash" style="display:none">
+    <div class="stats" id="stats"></div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-bottom:8px">
+        <input id="search" placeholder="🔍 Search name / roll…" style="flex:1;min-width:200px" />
+        <button class="btn ghost" id="refreshBtn">↻ Refresh</button>
+      </div>
+      <div style="overflow:auto"><table id="tbl"></table></div>
+      <div class="sub" id="count" style="margin-top:10px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// The exam's Apps Script Web App URL (same one used by the exam):
+const ENDPOINT="https://script.google.com/macros/s/AKfycbxENa9KEg01PBkKJ_cn19v09qQxlVYGp4Ts5g6KBpvXDP2cl6wC4Bj5n3LGdtQuhwoZ/exec";
+const $=id=>document.getElementById(id);
+let HEAD=[],ROWS=[],sortCol=-1,sortDir=-1,sheetUrl="";
+
+$('key').value=localStorage.getItem('examKey')||'';
+$('loadBtn').onclick=load;
+$('refreshBtn').onclick=load;
+$('sheetBtn').onclick=()=>{ if(sheetUrl) open(sheetUrl,'_blank'); else open(ENDPOINT,'_blank'); };
+$('search').oninput=render;
+$('key').addEventListener('keydown',e=>{if(e.key==='Enter')load();});
+
+function load(){
+  const key=$('key').value.trim(); if(!key){$('err').textContent="Enter the passcode.";return;}
+  localStorage.setItem('examKey',key); $('err').textContent="Loading…";
+  const cb="__examcb_"+Date.now();
+  const s=document.createElement('script');
+  const to=setTimeout(()=>{$('err').textContent="Timed out. Check the endpoint URL / deployment.";cleanup();},12000);
+  function cleanup(){delete window[cb];s.remove();}
+  window[cb]=res=>{
+    clearTimeout(to);cleanup();
+    if(!res.ok){$('err').textContent=res.error||"Could not load.";return;}
+    $('err').textContent="";sheetUrl=res.sheetUrl||"";
+    const data=res.rows||[];
+    if(!data.length){$('err').textContent="No responses yet.";return;}
+    HEAD=data[0].map(String);ROWS=data.slice(1);
+    sortCol=col('Percent');sortDir=-1;
+    $('dash').style.display='block';renderStats();render();
+  };
+  s.src=`${ENDPOINT}?action=results&key=${encodeURIComponent(key)}&callback=${cb}`;
+  document.body.appendChild(s);
+}
+function col(name){return HEAD.findIndex(h=>h.toLowerCase().startsWith(name.toLowerCase()));}
+function val(r,name){const i=col(name);return i>=0?r[i]:'';}
+function num(x){const n=parseFloat(x);return isNaN(n)?0:n;}
+
+function renderStats(){
+  const pcts=ROWS.map(r=>num(val(r,'Percent')));
+  const n=ROWS.length;
+  const avg=n?Math.round(pcts.reduce((a,b)=>a+b,0)/n):0;
+  const hi=n?Math.max(...pcts):0, lo=n?Math.min(...pcts):0;
+  const viol=ROWS.filter(r=>num(val(r,'Violations'))>0).length;
+  const auto=ROWS.filter(r=>String(val(r,'Auto')).toUpperCase()==='YES').length;
+  $('stats').innerHTML=
+    stat(n,'STUDENTS')+stat(avg+'%','AVERAGE')+stat(hi+'%','HIGHEST')+stat(lo+'%','LOWEST')+
+    stat(viol,'⚠ WITH VIOLATIONS')+stat(auto,'AUTO-SUBMITTED');
+}
+function stat(v,l){return `<div class="stat"><b>${v}</b><span>${l}</span></div>`;}
+
+function render(){
+  const q=$('search').value.trim().toLowerCase();
+  let rows=ROWS.map((r,i)=>({r,i}));
+  if(q) rows=rows.filter(o=>(val(o.r,'Name')+' '+val(o.r,'Roll')).toLowerCase().includes(q));
+  if(sortCol>=0) rows.sort((a,b)=>{
+    let x=a.r[sortCol],y=b.r[sortCol];
+    const nx=parseFloat(x),ny=parseFloat(y);
+    if(!isNaN(nx)&&!isNaN(ny)){x=nx;y=ny;}else{x=String(x).toLowerCase();y=String(y).toLowerCase();}
+    return (x<y?-1:x>y?1:0)*sortDir;
+  });
+  const show=['Name','Roll','Section','Score','Percent','Time','Violations','Super','Submitted'];
+  let th='<tr>'+show.map(s=>{const c=col(s);const arrow=c===sortCol?(sortDir<0?' ▼':' ▲'):'';return `<th data-c="${c}">${HEAD[c]||s}${arrow}</th>`;}).join('')+'</tr>';
+  let body=rows.map(o=>{
+    const r=o.r;const pct=num(val(r,'Percent'));
+    const cls=pct>=70?'scoreGood':pct>=40?'scoreMid':'scoreBad';
+    const vi=num(val(r,'Violations'));const auto=String(val(r,'Auto')).toUpperCase()==='YES';
+    return '<tr>'+show.map(s=>{
+      const c=col(s);let v=c>=0?r[c]:'';
+      if(s==='Percent')v=`<span class="${cls}">${v}%</span>`;
+      if(s==='Violations'&&vi>0)v=`<span class="tagV">⚠ ${v}</span>`;
+      if(s==='Submitted')v=String(v).replace('T',' ').replace(/\..*/,'');
+      return `<td>${v}${s==='Name'&&auto?' <span class="tagA">(auto)</span>':''}</td>`;
+    }).join('')+'</tr>';
+  }).join('');
+  const t=$('tbl');t.innerHTML=th+body;
+  [...t.querySelectorAll('th')].forEach(h=>h.onclick=()=>{const c=+h.dataset.c;if(c<0)return;if(sortCol===c)sortDir*=-1;else{sortCol=c;sortDir=-1;}render();});
+  $('count').textContent=`${rows.length} of ${ROWS.length} students shown.`;
+}
+</script>
+</body>
+</html>

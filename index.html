@@ -55,7 +55,17 @@
   .panelTitle{font-size:12px;color:var(--muted);letter-spacing:1px;font-weight:700;margin-bottom:14px}
 
   /* left: question palette */
-  .leftCol{display:flex;flex-direction:column}
+  .leftCol{display:flex;flex-direction:column;gap:20px}
+  .palettePanel{flex:0 0 auto}
+  .paletteHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .miniRing{--p:0;width:56px;height:56px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--good) calc(var(--p)*1%),#1a2138 0);transition:background .4s}
+  .miniRing i{width:44px;height:44px;border-radius:50%;background:#0e1326;display:grid;place-items:center;font-style:normal;font-size:12.5px;font-weight:800}
+  .overviewPanel{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center}
+  .ovStats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .ovStat{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:14px;text-align:center}
+  .ovStat b{display:block;font-size:27px;font-weight:800}
+  .ovStat span{font-size:11.5px;color:var(--muted)}
+  .ovTip{background:linear-gradient(135deg,rgba(109,139,255,.12),rgba(162,91,255,.1));border:1px solid #6d8bff44;border-radius:14px;padding:15px 16px;font-size:14px;line-height:1.55;color:#cdd6ff;min-height:70px;display:flex;align-items:center;transition:opacity .3s}
   .legend{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
   .legend .lrow{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--muted)}
   .lbox{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;font-size:11px;font-weight:800;color:#fff;flex:0 0 auto}
@@ -108,8 +118,20 @@
   .infoGrid{display:flex;flex-direction:column;gap:12px}
   .infoRow{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--muted)}
   .infoRow b{color:var(--txt);font-size:14px;text-align:right}
-  .progBar{height:10px;border-radius:6px;background:#1a2138;overflow:hidden;margin-top:4px}
-  .progFill{height:100%;width:0;background:linear-gradient(90deg,var(--good),var(--accent));transition:width .4s}
+  .tipsPanel{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center}
+  .bigTip{font-size:16.5px;line-height:1.55;color:#dfe6ff;text-align:center;transition:opacity .3s}
+  .bigTip .te{font-size:38px;display:block;margin-bottom:12px;animation:bounce 1.6s infinite}
+  /* result review */
+  .reviewWrap{margin-top:28px;text-align:left}
+  .reviewWrap h2{text-align:center;margin-bottom:14px}
+  .reviewList{display:flex;flex-direction:column;gap:10px}
+  .revItem{border:1px solid var(--line);border-left-width:4px;border-radius:12px;padding:13px 15px;background:var(--card2)}
+  .revItem.ok{border-left-color:var(--good)} .revItem.bad{border-left-color:var(--bad)}
+  .revQ{font-size:14.5px;font-weight:600;margin-bottom:7px;line-height:1.4}
+  .revLine{font-size:13px;color:var(--muted);margin-top:2px}
+  .revLine.mine b{color:var(--txt)} .revLine.cor b{color:#7dffb0}
+  .revBadge{font-weight:800;margin-left:8px}
+  .revBadge.ok{color:var(--good)} .revBadge.bad{color:var(--bad)}
 
   /* overlays */
   .overlay{position:fixed;inset:0;background:rgba(8,10,20,.93);display:flex;align-items:center;justify-content:center;z-index:60;padding:20px}
@@ -174,16 +196,31 @@
 <!-- ============ EXAM ============ -->
 <section id="examScreen" class="hidden">
   <div class="examLayout">
-    <!-- LEFT: question palette -->
-    <aside class="leftCol panel">
-      <div class="panelTitle">QUESTION PALETTE</div>
-      <div class="legend">
-        <div class="lrow"><span class="lbox unv" id="cUnv">0</span> Not Visited</div>
-        <div class="lrow"><span class="lbox no" id="cNo">0</span> Not Answered</div>
-        <div class="lrow"><span class="lbox ans" id="cAns">0</span> Answered</div>
-        <div class="lrow"><span class="lbox cur">▶</span> Current</div>
+    <!-- LEFT: question palette + overview -->
+    <aside class="leftCol">
+      <div class="panel palettePanel">
+        <div class="paletteHead">
+          <div class="panelTitle" style="margin:0">QUESTION MAP</div>
+          <div class="miniRing" id="ovRing"><i id="ovPct">0%</i></div>
+        </div>
+        <div class="legend">
+          <div class="lrow"><span class="lbox unv" id="cUnv">0</span> Not Visited</div>
+          <div class="lrow"><span class="lbox no" id="cNo">0</span> Not Answered</div>
+          <div class="lrow"><span class="lbox ans" id="cAns">0</span> Answered</div>
+          <div class="lrow"><span class="lbox cur">▶</span> Current</div>
+        </div>
+        <div class="palGrid" id="palGrid"></div>
       </div>
-      <div class="palGrid" id="palGrid"></div>
+      <div class="panel overviewPanel">
+        <div class="panelTitle">EXAM OVERVIEW</div>
+        <div class="ovStats">
+          <div class="ovStat"><b id="ovAnswered">0</b><span>ANSWERED</span></div>
+          <div class="ovStat"><b id="ovRemain">60</b><span>REMAINING</span></div>
+          <div class="ovStat"><b id="ovElapsed">00:00</b><span>ELAPSED</span></div>
+          <div class="ovStat"><b id="ovViol" style="color:var(--warn)">0</b><span>VIOLATIONS</span></div>
+        </div>
+        <div class="ovTip" id="ovTip">💡 Tip…</div>
+      </div>
     </aside>
 
     <!-- CENTER: question -->
@@ -211,13 +248,9 @@
           <div class="infoRow"><span>Type</span><b id="iType">—</b></div>
         </div>
       </div>
-      <div class="panel">
-        <div class="panelTitle">YOUR PROGRESS</div>
-        <div class="infoGrid">
-          <div class="infoRow"><span>Answered</span><b id="iAnswered">0 / 60</b></div>
-          <div class="progBar"><div class="progFill" id="iProg"></div></div>
-          <div class="infoRow" style="margin-top:6px"><span>Elapsed time</span><b id="iElapsed">00:00</b></div>
-        </div>
+      <div class="panel tipsPanel">
+        <div class="panelTitle" style="text-align:center">STAY SHARP</div>
+        <div class="bigTip" id="bigTip"><span class="te">🎯</span>Read carefully, then commit.</div>
       </div>
     </aside>
   </div>
@@ -232,6 +265,10 @@
     <div class="resultScore" id="resScore">—</div>
     <div class="statRow" id="resStats"></div>
     <div class="sub" id="resSync" style="margin-top:16px"></div>
+    <div class="reviewWrap hidden" id="reviewWrap">
+      <h2>📋 Review Your Answers</h2>
+      <div class="reviewList" id="reviewList"></div>
+    </div>
   </section>
 </div>
 
@@ -267,6 +304,7 @@ const CONFIG = {
   questionsPerStudent: 60,
   maxViolations: 3,
   showScoreToStudent: true,
+  showAnswersReview: true,   // let students see their answers + the correct ones after submitting
   appsScriptUrl: "https://script.google.com/macros/s/AKfycbxENa9KEg01PBkKJ_cn19v09qQxlVYGp4Ts5g6KBpvXDP2cl6wC4Bj5n3LGdtQuhwoZ/exec"
 };
 const SUPER_IDS = new Set([5,14,22,28,30,32,44,51,54,62,63,70,82,87,88,91,95,99,116,119]);
@@ -386,9 +424,43 @@ function updatePalette(){
 }
 function updateProgress(){
   const ans=answers.filter(a=>a.length).length;
-  el('iAnswered').textContent=`${ans} / ${exam.length}`;
-  el('iProg').style.width=(ans/exam.length*100)+'%';
-  el('iElapsed').textContent=fmt(Math.round((Date.now()-startTime)/1000));
+  el('ovAnswered').textContent=ans;
+  el('ovRemain').textContent=exam.length-ans;
+  el('ovElapsed').textContent=fmt(Math.round((Date.now()-startTime)/1000));
+  el('ovViol').textContent=violations.length;
+  const pct=Math.round(ans/exam.length*100);
+  el('ovPct').textContent=pct+'%';
+  el('ovRing').style.setProperty('--p',pct);
+}
+
+/* rotating tips */
+const OV_TIPS=[
+  "💡 Stuck? The real-life hint under every question is always there for you.",
+  "🍀 Some lucky questions hide a Super-Hint puzzle — solve it for a keyword clue!",
+  "⏱ Each question has its own timer. Lock in your best answer before it runs out.",
+  "🟩 Green = answered, 🟥 red = skipped. Watch your map fill up!",
+  "🧘 Stay calm and read every option before choosing."
+];
+const BIG_TIPS=[
+  {e:"🎯",t:"Read carefully, then commit. Trust what you studied."},
+  {e:"🔥",t:"One question at a time — you've got this!"},
+  {e:"🌟",t:"Every answer is progress. Keep that map turning green!"},
+  {e:"🧠",t:"Think it through — your prep is paying off."},
+  {e:"💪",t:"Don't rush, don't freeze. Steady wins the exam."},
+  {e:"⚡",t:"Eyes on the question, not the clock."}
+];
+let tipTimer=null,tipI=0;
+function startTips(){
+  function tick(){
+    el('ovTip').style.opacity=0;el('bigTip').style.opacity=0;
+    setTimeout(()=>{
+      el('ovTip').textContent=OV_TIPS[tipI%OV_TIPS.length];
+      const b=BIG_TIPS[tipI%BIG_TIPS.length];
+      el('bigTip').innerHTML=`<span class="te">${b.e}</span>${b.t}`;
+      el('ovTip').style.opacity=1;el('bigTip').style.opacity=1;tipI++;
+    },250);
+  }
+  tick();tipTimer=setInterval(tick,5000);
 }
 
 /* ===================== fullscreen ===================== */
@@ -405,7 +477,7 @@ el('startBtn').onclick=async()=>{
   el('loginWrap').style.display='none';
   el('examScreen').classList.remove('hidden');
   examStarted=true;startTime=Date.now();
-  attachProctoring();renderQuestion();
+  attachProctoring();startTips();renderQuestion();
 };
 
 /* ===================== render question ===================== */
@@ -502,7 +574,7 @@ el('msContinue').onclick=()=>{el('milestoneOverlay').classList.add('hidden');ren
 function logViolation(type){
   if(!examStarted||finished)return;
   violations.push({type,q:idx+1,time:new Date().toISOString()});
-  el('warnCount').textContent=`⚠ ${violations.length}`;showOverlay(type);
+  el('warnCount').textContent=`⚠ ${violations.length}`;updateProgress();showOverlay(type);
   if(violations.length>=CONFIG.maxViolations)finishExam(true);
 }
 function showOverlay(type){
@@ -537,7 +609,7 @@ function isCorrect(q,chosen){
   return chosen.length===1&&correctIdx.includes(chosen[0]);
 }
 function finishExam(auto){
-  if(finished)return;finished=true;clearInterval(qTimer);
+  if(finished)return;finished=true;clearInterval(qTimer);if(tipTimer)clearInterval(tipTimer);
   el('overlay').classList.add('hidden');el('puzzleOverlay').classList.add('hidden');el('milestoneOverlay').classList.add('hidden');
   let score=0;
   const detail=exam.map((q,i)=>{const ok=isCorrect(q,answers[i]);if(ok)score++;
@@ -547,8 +619,23 @@ function finishExam(auto){
     timeTakenSec,autoSubmitted:!!auto,violationCount:violations.length,violations,
     hintsUsed:0,superHintsUsed,questionIds:exam.map(q=>q.id),detail,submittedAt:new Date().toISOString(),examTitle:CONFIG.examTitle};
 
-  el('examScreen').classList.add('hidden');el('resultWrap').style.display='flex';
+  el('examScreen').classList.add('hidden');el('resultWrap').style.display='flex';el('resultWrap').style.justifyContent='flex-start';
   el('resName').textContent=`${student.name} · ${student.roll}`;
+
+  if(CONFIG.showAnswersReview){
+    const list=el('reviewList');list.innerHTML='';
+    exam.forEach((q,i)=>{
+      const ok=isCorrect(q,answers[i]);
+      const mine=answers[i].length?answers[i].map(c=>q.opts[c].text).join(', '):'— (not answered)';
+      const corr=q.opts.filter(o=>o.correct).map(o=>o.text).join(', ');
+      const d=document.createElement('div');d.className='revItem '+(ok?'ok':'bad');
+      d.innerHTML=`<div class="revQ">Q${i+1}. ${escapeHtml(q.q)}<span class="revBadge ${ok?'ok':'bad'}">${ok?'✓':'✗'}</span></div>`+
+        `<div class="revLine mine">Your answer: <b>${escapeHtml(mine)}</b></div>`+
+        (ok?'':`<div class="revLine cor">Correct answer: <b>${escapeHtml(corr)}</b></div>`);
+      list.appendChild(d);
+    });
+    el('reviewWrap').classList.remove('hidden');
+  }
   if(CONFIG.showScoreToStudent){
     const cls=pct>=70?'scoreGood':pct>=40?'scoreMid':'scoreBad';
     el('resScore').innerHTML=`<span class="${cls}">${score} / ${total}</span>`;

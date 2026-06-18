@@ -74,11 +74,33 @@ function doPost(e) {
   }
 }
 
-// Visiting the Web app URL shows a link to your results sheet.
-function doGet() {
-  var ss = getSpreadsheet_();
+// Passcode the teacher dashboard uses to fetch results. CHANGE THIS.
+var TEACHER_KEY = "aiexam2026";
+
+// GET: dashboard data (JSONP) when action=results, else a friendly link page.
+function doGet(e) {
+  var p = (e && e.parameter) || {};
+
+  if (p.action === 'results') {
+    var payload;
+    if (p.key !== TEACHER_KEY) {
+      payload = { ok: false, error: 'Wrong passcode' };
+    } else {
+      var ss = getSpreadsheet_();
+      var sh = ss.getSheetByName('Responses');
+      payload = { ok: true, sheetUrl: ss.getUrl(), rows: sh ? sh.getDataRange().getValues() : [] };
+    }
+    var json = JSON.stringify(payload);
+    if (p.callback) {  // JSONP — avoids cross-origin issues
+      return ContentService.createTextOutput(p.callback + '(' + json + ')')
+        .setMimeType(ContentService.MimeType.JAVASCRIPT);
+    }
+    return ContentService.createTextOutput(json).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var ss2 = getSpreadsheet_();
   return HtmlService.createHtmlOutput(
     '<p>Secure Exam endpoint is live.</p>' +
-    '<p>Results sheet: <a href="' + ss.getUrl() + '" target="_blank">' + ss.getUrl() + '</a></p>'
+    '<p>Results sheet: <a href="' + ss2.getUrl() + '" target="_blank">' + ss2.getUrl() + '</a></p>'
   );
 }
